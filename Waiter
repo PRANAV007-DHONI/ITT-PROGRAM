@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int* waiter(int number_count, int* number, int q, int* result_count) {
+    // 1. Generate the first q primes
+    int* primes = (int*)malloc(q * sizeof(int));
+    int prime_count = 0;
+    int num = 2;
+    while (prime_count < q) {
+        int is_prime = 1;
+        for (int i = 2; i * i <= num; i++) {
+            if (num % i == 0) {
+                is_prime = 0;
+                break;
+            }
+        }
+        if (is_prime) {
+            primes[prime_count++] = num;
+        }
+        num++;
+    }
+
+    // 2. Allocate the final answers array
+    *result_count = number_count;
+    int* answers = (int*)malloc(number_count * sizeof(int));
+    int ans_idx = 0;
+
+    // 3. Setup dynamic arrays to act as stacks
+    int* current_A = (int*)malloc(number_count * sizeof(int));
+    int current_A_count = number_count;
+    
+    // Copy initial configuration into current_A
+    for (int i = 0; i < number_count; i++) {
+        current_A[i] = number[i];
+    }
+
+    int* next_A = (int*)malloc(number_count * sizeof(int));
+    int* pile_B = (int*)malloc(number_count * sizeof(int));
+
+    // 4. Run through the iteration loops
+    for (int i = 0; i < q; i++) {
+        int current_prime = primes[i];
+        int next_A_count = 0;
+        int pile_B_count = 0;
+
+        // Pop elements from the top (end) of current_A stack
+        for (int j = current_A_count - 1; j >= 0; j--) {
+            int plate = current_A[j];
+            if (plate % current_prime == 0) {
+                pile_B[pile_B_count++] = plate; // push to B
+            } else {
+                next_A[next_A_count++] = plate; // push to next A
+            }
+        }
+
+        // Pop elements from top of pile_B directly into answers array
+        for (int j = pile_B_count - 1; j >= 0; j--) {
+            answers[ans_idx++] = pile_B[j];
+        }
+
+        // Swap next_A to become current_A for the next iteration
+        int* temp = current_A;
+        current_A = next_A;
+        next_A = temp;
+        current_A_count = next_A_count;
+    }
+
+    // 5. Move remaining elements in stack A from top to bottom into answers
+    for (int j = current_A_count - 1; j >= 0; j--) {
+        answers[ans_idx++] = current_A[j];
+    }
+
+    // 6. Free operational memory
+    free(primes);
+    free(current_A);
+    free(next_A);
+    free(pile_B);
+
+    return answers;
+}
+
+int main() {
+    int n, q;
+    if (scanf("%d %d", &n, &q) != 2) return 0;
+
+    int* number = (int*)malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &number[i]) != 1) return 0;
+    }
+
+    int result_count;
+    int* result = waiter(n, number, q, &result_count);
+
+    for (int i = 0; i < result_count; i++) {
+        printf("%d\n", result[i]);
+    }
+
+    free(number);
+    free(result);
+    return 0;
+}
+
