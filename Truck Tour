@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n;
+    // Read the total number of petrol pumps
+    if (scanf("%d", &n) != 1) return 0;
+
+    int start_point = 0;
+    long long total_surplus = 0;
+    long long current_surplus = 0;
+
+    for (int i = 0; i < n; i++) {
+        long long petrol, distance;
+        // Read amount of petrol and distance to the next pump
+        if (scanf("%lld %lld", &petrol, &distance) != 2) return 0;
+
+        long long net_fuel = petrol - distance;
+        total_surplus += net_fuel;
+        current_surplus += net_fuel;
+
+        // If current surplus drops below 0, it means we cannot reach 
+        // the next pump from our current start point.
+        if (current_surplus < 0) {
+            start_point = i + 1; // Pick the next pump as the new candidate starting point
+            current_surplus = 0; // Reset our current fuel gauge
+        }
+    }
+
+    // If total petrol across the circle is at least equal to total distance,
+    // the current start_point candidate is mathematically guaranteed to be valid.
+    if (total_surplus >= 0) {
+        printf("%d\n", start_point);
+    } else {
+        printf("-1\n"); // No valid tour is possible
+    }
+
+    return 0;
+}
