@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+/*
+ * Complete the 'hourglassSum' function below.
+ *
+ * The function is expected to return an INTEGER.
+ * The function accepts 2D_INTEGER_ARRAY arr as parameter.
+ */
+int hourglassSum(int arr_rows, int arr_columns, int** arr) {
+    // Initialize max_sum to the lowest possible integer value
+    int max_sum = INT_MIN;
+
+    // An hourglass needs a 3x3 frame, so the top-left corner 
+    // can only go up to row index 3 and column index 3 (0-indexed)
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            
+            // Calculate the sum of the current hourglass
+            int top    = arr[i][j]   + arr[i][j+1]   + arr[i][j+2];
+            int middle = arr[i+1][j+1];
+            int bottom = arr[i+2][j] + arr[i+2][j+1] + arr[i+2][j+2];
+            
+            int current_hourglass_sum = top + middle + bottom;
+
+            // Track the maximum sum found
+            if (current_hourglass_sum > max_sum) {
+                max_sum = current_hourglass_sum;
+            }
+        }
+    }
+
+    return max_sum;
+}
+
+int main() {
+    int rows = 6;
+    int cols = 6;
+
+    // Allocate memory for the 6x6 2D array matrix
+    int** arr = (int**)malloc(rows * sizeof(int*));
+    for (int i = 0; i < rows; i++) {
+        arr[i] = (int*)malloc(cols * sizeof(int));
+        for (int j = 0; j < cols; j++) {
+            if (scanf("%d", &arr[i][j]) != 1) return 0;
+        }
+    }
+
+    // Execute the hourglass search algorithm
+    int result = hourglassSum(rows, cols, arr);
+    
+    // Print the final maximum hourglass sum
+    printf("%d\n", result);
+
+    // Free dynamically allocated memory blocks
+    for (int i = 0; i < rows; i++) {
+        free(arr[i]);
+    }
+    free(arr);
+
+    return 0;
+}
