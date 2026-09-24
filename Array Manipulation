@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+long long arrayManipulation(int n, int queries_rows, int queries_columns, int** queries) {
+    // 1. Allocate a 1-indexed difference array initialized to 0.
+    long long* diff_arr = (long long*)calloc(n + 2, sizeof(long long));
+    
+    // 2. Process each update query range boundary
+    for (int i = 0; i < queries_rows; i++) {
+        int a = queries[i][0];
+        int b = queries[i][1];
+        long long k = queries[i][2];
+        
+        diff_arr[a] += k;       
+        diff_arr[b + 1] -= k;   
+    }
+    
+    // 3. Find the maximum cumulative value using prefix scanning
+    long long max_value = 0;
+    long long current_sum = 0;
+    
+    for (int i = 1; i <= n; i++) {
+        current_sum += diff_arr[i];
+        if (current_sum > max_value) {
+            max_value = current_sum;
+        }
+    }
+    
+    // 4. Safely release allocated array memory block
+    free(diff_arr);
+    
+    return max_value;
+}
+
+int main() {
+    int n, q;
+    if (scanf("%d %d", &n, &q) != 2) return 0;
+
+    // Allocate memory for the 2D queries array
+    int** queries = (int**)malloc(q * sizeof(int*));
+    for (int i = 0; i < q; i++) {
+        queries[i] = (int*)malloc(3 * sizeof(int));
+        if (scanf("%d %d %d", &queries[i][0], &queries[i][1], &queries[i][2]) != 3) return 0;
+    }
+
+    // Execute the algorithm
+    long long result = arrayManipulation(n, q, 3, queries);
+    
+    // Output the final max answer
+    printf("%lld\n", result);
+
+    // Free all dynamically allocated memory
+    for (int i = 0; i < q; i++) {
+        free(queries[i]);
+    }
+    free(queries);
+
+    return 0;
+}
