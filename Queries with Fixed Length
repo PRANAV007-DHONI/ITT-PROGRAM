@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define INF 2e9
+
+/*
+ * Complete the 'solve' function below.
+ *
+ * The function is expected to return an INTEGER_ARRAY.
+ * The function accepts following parameters:
+ *  1. INTEGER_ARRAY arr
+ *  2. INTEGER_ARRAY queries
+ *  3. INTEGER q_count
+ *  4. INTEGER_POINTER result_count
+ */
+int* solve(int arr_count, int* arr, int queries_count, int* queries, int* result_count) {
+    // Allocate the answers array
+    *result_count = queries_count;
+    int* answers = (int*)malloc(queries_count * sizeof(int));
+
+    // Allocate memory for our custom double-ended queue (deque)
+    // In the worst case, the deque will hold at most arr_count indices
+    int* deque = (int*)malloc(arr_count * sizeof(int));
+
+    for (int q = 0; q < queries_count; q++) {
+        int d = queries[q];
+        int head = 0, tail = 0; // Deque pointers
+        int min_of_maxima = INF;
+
+        for (int i = 0; i < arr_count; i++) {
+            // 1. Remove elements out of the current window from the front
+            if (head < tail && deque[head] <= i - d) {
+                head++;
+            }
+
+            // 2. Maintain decreasing order: remove smaller elements from the back
+            while (head < tail && arr[deque[tail - 1]] <= arr[i]) {
+                tail--;
+            }
+
+            // 3. Push current element index to the back of the deque
+            deque[tail++] = i;
+
+            // 4. Once we have a complete window of size d, record the maximum
+            if (i >= d - 1) {
+                int current_max = arr[deque[head]];
+                if (current_max < min_of_maxima) {
+                    min_of_maxima = current_max;
+                }
+            }
+        }
+        answers[q] = min_of_maxima;
+    }
+
+    // Clean up local tracking storage
+    free(deque);
+    return answers;
+}
+
+int main() {
+    int n, q;
+    if (scanf("%d %d", &n, &q) != 2) return 0;
+
+    int* arr = (int*)malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &arr[i]) != 1) return 0;
+    }
+
+    int* queries = (int*)malloc(q * sizeof(int));
+    for (int i = 0; i < q; i++) {
+        if (scanf("%d", &queries[i]) != 1) return 0;
+    }
+
+    int result_count;
+    int* result = solve(n, arr, q, queries, &result_count);
+
+    for (int i = 0; i < result_count; i++) {
+        printf("%d\n", result[i]);
+    }
+
+    // Free all heap allocations
+    free(arr);
+    free(queries);
+    free(result);
+
+    return 0;
+}
