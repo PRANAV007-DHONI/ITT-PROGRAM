@@ -1,0 +1,33 @@
+/*
+Detect a cycle in a linked list. Note that the head pointer may be 'NULL' if the list is empty.
+
+A Node is defined as: 
+struct Node {
+    int data;
+    struct Node* next;
+}
+*/
+
+bool has_cycle(Node* head) {
+    // If the list is empty, there is no cycle
+    if (head == NULL) {
+        return false;
+    }
+
+    Node* slow = head;
+    Node* fast = head;
+
+    // Traverse the list with the tortoise and hare approach
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;          // Moves 1 step
+        fast = fast->next->next;    // Moves 2 steps
+
+        // If pointers match, a cycle is confirmed
+        if (slow == fast) {
+            return true;
+        }
+    }
+
+    // Fast reached the end of the list safely
+    return false;
+}
